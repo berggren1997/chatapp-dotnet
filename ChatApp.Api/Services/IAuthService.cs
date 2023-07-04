@@ -7,5 +7,5 @@ namespace ChatApp.Api.Services;
 public interface IAuthService
 {
     Task<RegisterResponse> Register(RegisterRequest registerRequest);
-    //Task<bool> Login(string username, string password);
+    Task<bool> Login(LoginRequest loginRequest);
 }

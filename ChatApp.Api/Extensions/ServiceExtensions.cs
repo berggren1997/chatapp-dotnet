@@ -17,7 +17,14 @@ public static class ServiceExtensions
             options.UseMySql(connectionstring, serverVersion));
     }
 
-    public static void ConfigureEfCoreIdentity(this IServiceCollection services)
+    public static void ConfigureMSSQLConnection(this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddDbContext<ChatAppContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("MSSQLConnection")));
+    }
+
+    public static void ConfigureIdentity(this IServiceCollection services)
     {
         var builder = services.AddIdentity<AppUser, AppRole>(config =>
         {
@@ -27,13 +34,32 @@ public static class ServiceExtensions
             config.Password.RequireNonAlphanumeric = false;
             config.Password.RequiredLength = 5;
             config.User.RequireUniqueEmail = true;
+
         }).AddEntityFrameworkStores<ChatAppContext>()
         .AddDefaultTokenProviders();
     }
 
-    public static void ConfigureAuthentication(this IServiceCollection services)
+    //public static void ConfigureAuthentication(this IServiceCollection services)
+    //{
+    //    services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    //        .AddCookie("default", options =>
+    //        {
+    //            options.Cookie.Name = "qid";
+    //            //options.ExpireTimeSpan = TimeSpan.FromDays(1);
+    //            options.SlidingExpiration = true;
+    //        });
+    //}
+
+    public static void ConfigureCookiePolicy(this WebApplication app)
     {
-        services.AddAuthentication();
+        var cookiePolicyOptions = new CookiePolicyOptions
+        {
+            MinimumSameSitePolicy = SameSiteMode.Strict,
+            HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
+            Secure = CookieSecurePolicy.None,
+        };
+
+        app.UseCookiePolicy(cookiePolicyOptions);
     }
 
     public static void ConfigureServices(this IServiceCollection services)

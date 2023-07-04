@@ -14,6 +14,13 @@ public class AuthService : IAuthService
         _userManager = userManager;
     }
 
+    public async Task<bool> Login(LoginRequest loginRequest)
+    {
+        var user = await _userManager.FindByNameAsync(loginRequest.Username);
+
+        return user != null && await _userManager.CheckPasswordAsync(user, loginRequest.Password);
+    }
+
     public async Task<RegisterResponse> Register(RegisterRequest registerRequest)
     {
         var newUser = new AppUser

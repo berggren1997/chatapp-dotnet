@@ -8,10 +8,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //builder.Services.ConfigureMySqlConnection(builder.Configuration);
-builder.Services.AddDbContext<ChatAppContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQLConnection")));
-builder.Services.ConfigureAuthentication();
-builder.Services.ConfigureEfCoreIdentity();
+builder.Services.ConfigureMSSQLConnection(builder.Configuration);
+builder.Services.ConfigureIdentity();
 builder.Services.ConfigureServices();
 
 var app = builder.Build();

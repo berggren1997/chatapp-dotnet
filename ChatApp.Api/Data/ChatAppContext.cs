@@ -25,10 +25,7 @@ public class ChatAppContext : IdentityDbContext<AppUser, AppRole, Guid>
             .WithMany()
             .HasForeignKey(r => r.RecipientId)
             .OnDelete(DeleteBehavior.Restrict);
-        //modelBuilder.Entity<Conversation>()
-        //        .HasOne(x => x.Crea)
-        //        .WithMany(x => x.Conversations)
-        //        .OnDelete(DeleteBehavior.Restrict);
+        
         base.OnModelCreating(builder);
     }
 }
