@@ -11,6 +11,11 @@ builder.Services.ConfigureMSSQLConnection(builder.Configuration);
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureServices();
 
+builder.Services.ConfigureApplicationCookie(opt =>
+{
+    opt.ExpireTimeSpan = TimeSpan.FromDays(7);
+});
+
 //builder.Services.AddDistributedMemoryCache();
 
 //builder.Services.AddSession(opt =>
