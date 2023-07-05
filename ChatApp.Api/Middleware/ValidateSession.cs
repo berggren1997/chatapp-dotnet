@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 
-namespace ChatApp.Api.Controllers.Middleware;
+namespace ChatApp.Api.Middleware;
 
 public class ValidateSession
 {
@@ -20,7 +20,7 @@ public class ValidateSession
 
         if (!_anonymousEndpoints.Contains(endpointPath))
         {
-            if(!context.User.Identity.IsAuthenticated)
+            if (!context.User.Identity.IsAuthenticated)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return;

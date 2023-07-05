@@ -1,4 +1,3 @@
-using ChatApp.Api.Controllers.Middleware;
 using ChatApp.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +27,6 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -37,9 +35,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
-
 //app.UseSession();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

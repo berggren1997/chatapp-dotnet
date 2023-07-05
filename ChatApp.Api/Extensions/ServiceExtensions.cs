@@ -1,6 +1,6 @@
 ﻿using ChatApp.Api.Data;
 using ChatApp.Api.Models;
-using ChatApp.Api.Services;
+using ChatApp.Api.Services.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 namespace ChatApp.Api.Extensions;

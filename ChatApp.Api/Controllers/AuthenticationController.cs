@@ -1,11 +1,8 @@
-﻿using ChatApp.Api.Services;
+﻿using ChatApp.Api.Services.Auth;
 using ChatApp.Shared.Requests.Auth;
 using ChatApp.Shared.Response.Auth;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace ChatApp.Api.Controllers;
 
@@ -34,22 +31,30 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
     {
         var loginSuccess = await _authService.Login(request);
 
         if (!loginSuccess)
         {
-            return BadRequest("Bad credentials");
+            return BadRequest(new LoginResponse
+            {
+                Success = false,
+                ErrorMessage = "Bad credentials."
+            });
         }
 
-        return Ok($"You are logged in as {request.Username}");
+        return Ok(new LoginResponse
+        {
+            Success = true,
+            Username = request.Username
+        });
     }
 
     [HttpGet("test"), Authorize]
     public ActionResult ProtectedRoute()
     {
-        return Ok("Protected route");
+        return Ok($"Protected route. Hello, {User!.Identity!.Name}");
     }
 
     //[Authorize("Admin")]

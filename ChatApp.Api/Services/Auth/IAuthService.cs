@@ -2,7 +2,7 @@
 using ChatApp.Shared.Response.Auth;
 using Microsoft.AspNetCore.Identity;
 
-namespace ChatApp.Api.Services;
+namespace ChatApp.Api.Services.Auth;
 
 public interface IAuthService
 {
