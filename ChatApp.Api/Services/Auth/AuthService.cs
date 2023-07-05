@@ -32,12 +32,15 @@ public class AuthService : IAuthService
     {
         AppUser? user = await _userManager.FindByNameAsync(loginRequest.Username);
 
-        bool successFulSignIn = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
-
-        if (user != null && successFulSignIn)
+        if (user != null)
         {
-            await _signInManager.SignInAsync(user, true);
-            return true;
+            bool successFulSignIn = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
+            
+            if (successFulSignIn)
+            {
+                await _signInManager.SignInAsync(user, true);
+                return true;
+            }
         }
 
         return false;
