@@ -25,7 +25,7 @@ public class AuthenticationController : ControllerBase
     {
         var registerRequest = await _authService.Register(request);
 
-        if(!registerRequest.Success)
+        if (!registerRequest.Success)
         {
             return BadRequest(registerRequest);
         }
@@ -38,43 +38,26 @@ public class AuthenticationController : ControllerBase
     {
         var loginSuccess = await _authService.Login(request);
 
-        if(!loginSuccess)
+        if (!loginSuccess)
         {
             return BadRequest("Bad credentials");
         }
 
-        await CreateCookie(request.Username);
-
         return Ok($"You are logged in as {request.Username}");
     }
 
-    [Authorize]
-    [HttpGet("test")]
+    [HttpGet("test"), Authorize]
     public ActionResult ProtectedRoute()
     {
-        var username = User?.Identity?.Name;
-        return Ok($"Hello, {username}");
+        return Ok("Protected route");
     }
 
-    private async Task CreateCookie(string username)
+    //[Authorize("Admin")]
+    [HttpGet("revoke")]
+    public async Task<IActionResult> RevokeSession(Guid userId)
     {
-        var claims = new List<Claim>()
-        {
-            new Claim(type: ClaimTypes.Name, username)
-        };
+        await _authService.RevokeSession(userId);
 
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(identity), 
-            new AuthenticationProperties
-            {
-                IsPersistent = true,
-                AllowRefresh = true,
-           
-            });
-
-
+        return Ok("All old usersessions should be inactive. Please log in again");
     }
 }

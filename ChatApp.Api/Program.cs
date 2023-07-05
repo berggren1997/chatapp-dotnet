@@ -1,6 +1,5 @@
-using ChatApp.Api.Data;
+using ChatApp.Api.Controllers.Middleware;
 using ChatApp.Api.Extensions;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +10,16 @@ builder.Services.AddSwaggerGen();
 builder.Services.ConfigureMSSQLConnection(builder.Configuration);
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureServices();
+
+//builder.Services.AddDistributedMemoryCache();
+
+//builder.Services.AddSession(opt =>
+//{
+//    opt.IdleTimeout = TimeSpan.FromMinutes(15);
+//    opt.Cookie.Name = "sid";
+//    opt.Cookie.HttpOnly = true;
+//    opt.Cookie.IsEssential = true;
+//});
 
 var app = builder.Build();
 
@@ -25,6 +34,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
+//app.UseSession();
 app.UseAuthorization();
 
 app.MapControllers();
