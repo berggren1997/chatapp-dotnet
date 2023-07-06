@@ -3,6 +3,7 @@ using ChatApp.Shared.Requests.Auth;
 using ChatApp.Shared.Response.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ChatApp.Api.Controllers;
 
@@ -51,10 +52,14 @@ public class AuthenticationController : ControllerBase
         });
     }
 
-    [HttpGet("test"), Authorize]
+    [HttpGet("me"), Authorize]
     public ActionResult ProtectedRoute()
     {
-        return Ok($"Protected route. Hello, {User!.Identity!.Name}");
+        return Ok(new
+        {
+            username = User!.Identity!.Name,
+            userId = User.FindFirst(ClaimTypes.NameIdentifier).Value
+        });
     }
 
     //[Authorize("Admin")]

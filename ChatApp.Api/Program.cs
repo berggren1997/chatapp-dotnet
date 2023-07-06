@@ -1,4 +1,5 @@
 using ChatApp.Api.Extensions;
+using ChatApp.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,11 +10,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.ConfigureMSSQLConnection(builder.Configuration);
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureServices();
-
-builder.Services.ConfigureApplicationCookie(opt =>
-{
-    opt.ExpireTimeSpan = TimeSpan.FromDays(7);
-});
+builder.Services.ConfigureCorsPolicy();
+builder.Services.ConfigureCookieOptions();
 
 //builder.Services.AddDistributedMemoryCache();
 
@@ -33,12 +31,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
+app.UseCors("DefaultPolicy");
 //app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<ValidateSession>();
 
 app.MapControllers();
 

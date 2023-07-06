@@ -1,6 +1,8 @@
 ﻿using ChatApp.Api.Data;
 using ChatApp.Api.Models;
 using ChatApp.Api.Services.Auth;
+using ChatApp.Api.Services.Conversations;
+using ChatApp.Api.Services.Messages;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 namespace ChatApp.Api.Extensions;
@@ -39,31 +41,38 @@ public static class ServiceExtensions
         .AddDefaultTokenProviders();
     }
 
-    //public static void ConfigureAuthentication(this IServiceCollection services)
-    //{
-    //    services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    //        .AddCookie("default", options =>
-    //        {
-    //            options.Cookie.Name = "qid";
-    //            //options.ExpireTimeSpan = TimeSpan.FromDays(1);
-    //            options.SlidingExpiration = true;
-    //        });
-    //}
-
-    public static void ConfigureCookiePolicy(this WebApplication app)
+    public static void ConfigureCorsPolicy(this IServiceCollection services)
     {
-        var cookiePolicyOptions = new CookiePolicyOptions
+        services.AddCors(opt =>
         {
-            MinimumSameSitePolicy = SameSiteMode.Strict,
-            HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
-            Secure = CookieSecurePolicy.None,
-        };
+            opt.AddPolicy("DefaultPolicy", config =>
+            {
+                config.AllowAnyHeader();
+                config.AllowAnyMethod();
+                //config.AllowAnyOrigin();
+                config.AllowCredentials();
+                config.WithOrigins("http://localhost:3000", "http://localhost:5247");
+            });
+        });
+    }
 
-        app.UseCookiePolicy(cookiePolicyOptions);
+    public static void ConfigureCookieOptions(this IServiceCollection services)
+    {
+        services.ConfigureApplicationCookie(opt =>
+        {
+            opt.ExpireTimeSpan = TimeSpan.FromDays(7);
+            opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            opt.Cookie.SameSite = SameSiteMode.None;
+            opt.Cookie.HttpOnly = true;
+            opt.SlidingExpiration = true;
+            opt.Cookie.Name = "qid";
+        });
     }
 
     public static void ConfigureServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IConversationService, ConversationService>();
+        services.AddScoped<IMessageService, MessageService>();
     }
 }

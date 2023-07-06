@@ -20,11 +20,7 @@ public class ValidateSession
 
         if (!_anonymousEndpoints.Contains(endpointPath))
         {
-            if (!context.User.Identity.IsAuthenticated)
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return;
-            }
+            await Console.Out.WriteLineAsync(context.User.Identity.Name);
         }
 
         await _next.Invoke(context);

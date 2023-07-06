@@ -38,7 +38,7 @@ public class AuthService : IAuthService
             
             if (successFulSignIn)
             {
-                await _signInManager.SignInAsync(user, true);
+                await _signInManager.SignInAsync(user, isPersistent: true);
                 return true;
             }
         }
