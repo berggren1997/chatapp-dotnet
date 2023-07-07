@@ -15,7 +15,7 @@ public class ConversationService : IConversationService
     }
 
     // we will grab creatorName from claims if user is authenticated
-    public async Task CreateConversation(string creatorName, string recipient)
+    public async Task<Guid> CreateConversation(string creatorName, string recipient)
     {
         var creatorUser = await _chatAppContext.Users
             .FirstOrDefaultAsync(c => c.UserName == creatorName);
@@ -43,6 +43,8 @@ public class ConversationService : IConversationService
 
         _chatAppContext.Conversations.Add(newConversation);
         await _chatAppContext.SaveChangesAsync();
+
+        return newConversation.Id;
     }
 
     public async Task<IEnumerable<ConversationDto>> GetConversations(string username)

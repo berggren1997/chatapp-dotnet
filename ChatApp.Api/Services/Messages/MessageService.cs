@@ -81,8 +81,8 @@ public class MessageService : IMessageService
         {
             throw new Exception("Error loading messages, user was not found");
         }
-        else if(conversation.Creator.UserName != sender.UserName ||
-            conversation.Recipient.UserName != sender.UserName)
+        else if((conversation.Creator.UserName != sender.UserName) &&
+            (conversation.Recipient.UserName != sender.UserName))
         {
             throw new Exception($"User: {sender.UserName} is not part of that conversation.");
         }

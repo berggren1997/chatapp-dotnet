@@ -28,9 +28,9 @@ public class ConversationController : ControllerBase
     {
         var creatorName = GetCurrentUsername();
 
-        await _conversationService.CreateConversation(creatorName!, recipient);
+        var newConversationId = await _conversationService.CreateConversation(creatorName!, recipient);
 
-        return Ok();
+        return Ok(newConversationId);
     }
 
     private string? GetCurrentUsername() => User!.Identity?.Name;
