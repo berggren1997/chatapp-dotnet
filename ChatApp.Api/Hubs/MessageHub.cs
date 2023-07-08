@@ -9,7 +9,7 @@ public class MessageHub : Hub
 {
     private async Task<bool> SendMessageAsync(MessageRequest messageRequest)
     {
-
+        await Console.Out.WriteLineAsync();
         return true;
     }
 }

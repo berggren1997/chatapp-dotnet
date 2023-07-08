@@ -31,14 +31,12 @@ public class MessageController : ControllerBase
 
         if (success)
         {
-            await _hubContext.Clients
-            //.Client(request.ConversationId.ToString())
-            .All
-            .SendAsync("OnMessageReceived", request.Message, username);
+            //await _hubContext.Clients
+            ////.Client(request.ConversationId.ToString())
+            //.All
+            //.SendAsync("OnMessageReceived", request.Message, username);
             return Ok();
         }
-        
-
         return BadRequest();
     }
 

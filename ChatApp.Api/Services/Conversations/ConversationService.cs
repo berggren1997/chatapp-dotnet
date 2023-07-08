@@ -18,21 +18,13 @@ public class ConversationService : IConversationService
     public async Task<Guid> CreateConversation(string creatorName, string recipient)
     {
         var creatorUser = await _chatAppContext.Users
-            .FirstOrDefaultAsync(c => c.UserName == creatorName);
-
-        if(creatorUser == null)
-        {
-            throw new Exception("Creator does not exists");
-        }
-
+            .FirstOrDefaultAsync(c => c.UserName == creatorName) ?? 
+                throw new Exception("Creator does not exists");
+        
         var recipientUser = await _chatAppContext.Users
-            .FirstOrDefaultAsync(c => c.UserName == recipient);
-
-        if (recipientUser== null)
-        {
+            .FirstOrDefaultAsync(c => c.UserName == recipient) ?? 
             throw new Exception("Recipient user does not exists");
-        }
-
+        
         var newConversation = new Conversation
         {
             Id = Guid.NewGuid(),
@@ -47,6 +39,7 @@ public class ConversationService : IConversationService
         return newConversation.Id;
     }
 
+    // TODO: Hämta bara x-antal konversationer
     public async Task<IEnumerable<ConversationDto>> GetConversations(string username)
     {
         var conversations = await _chatAppContext.Conversations
@@ -62,8 +55,8 @@ public class ConversationService : IConversationService
             CreatedAt = c.CreatedAt,
             ConversationDetails = new ConversationDetailDto
             {
-                Creator = c.Creator.UserName,
-                Recipient = c.Recipient!.UserName
+                Creator = c.Creator?.UserName!,
+                Recipient = c.Recipient?.UserName!
             }
         }).ToList();
 
