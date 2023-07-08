@@ -14,9 +14,11 @@ public class MessageService : IMessageService
     {
         _appContext = appContext;
     }
-
     
-    //TODO: Lägg så att man hämtar x-antal meddelande åt gången
+    //TODO:
+    //1. Lägg så att man hämtar x-antal meddelande åt gången
+    //2. Kanske fixa ett middleware, som gör dessa kontroller på inkommande request,
+    // för att korta ner metoden?
     public async Task<IEnumerable<MessageDto>> GetMessages(Guid conversationId, 
         string requesterUsername)
     {
@@ -61,7 +63,7 @@ public class MessageService : IMessageService
         }
     }
 
-    public async Task SendMessage(MessageRequest messageRequest, string senderName)
+    public async Task<bool> SendMessage(MessageRequest messageRequest, string senderName)
     {
         var conversation = await _appContext.Conversations
             .Include(u => u.Creator) 
@@ -97,7 +99,7 @@ public class MessageService : IMessageService
         };
 
         _appContext.Messages.Add(message);
-        await _appContext.SaveChangesAsync();
+        return await _appContext.SaveChangesAsync() > 0;
     }
 
 }

@@ -1,4 +1,5 @@
 using ChatApp.Api.Extensions;
+using ChatApp.Api.Hubs;
 using ChatApp.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ builder.Services.ConfigureIdentity();
 builder.Services.ConfigureServices();
 builder.Services.ConfigureCorsPolicy();
 builder.Services.ConfigureCookieOptions();
+builder.Services.AddSignalR();
 
 //builder.Services.AddDistributedMemoryCache();
 
@@ -40,6 +42,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<ValidateSession>();
+
+app.MapHub<MessageHub>("/messageHub");
 
 app.MapControllers();
 

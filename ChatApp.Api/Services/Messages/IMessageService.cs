@@ -5,7 +5,7 @@ namespace ChatApp.Api.Services.Messages;
 
 public interface IMessageService
 {
-    Task SendMessage(MessageRequest messageRequest, string senderName);
+    Task<bool> SendMessage(MessageRequest messageRequest, string senderName);
 
     // TODO: Meddelanden kan öka fort.. Se till att hämta ett gäng åt gången
     Task<IEnumerable<MessageDto>> GetMessages(Guid conversationId, string requesterUsername);

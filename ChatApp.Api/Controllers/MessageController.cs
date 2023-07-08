@@ -1,7 +1,9 @@
-﻿using ChatApp.Api.Services.Messages;
+﻿using ChatApp.Api.Hubs;
+using ChatApp.Api.Services.Messages;
 using ChatApp.Shared.Requests.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.Api.Controllers;
 
@@ -10,21 +12,34 @@ namespace ChatApp.Api.Controllers;
 public class MessageController : ControllerBase
 {
     private readonly IMessageService _messageService;
+    private readonly IHubContext<MessageHub> _hubContext;
 
-    public MessageController(IMessageService messageService)
+    public MessageController(IMessageService messageService, IHubContext<MessageHub> hubContext)
     {
         _messageService = messageService;
+        _hubContext = hubContext;
     }
 
     [HttpPost, Authorize]
     public async Task<IActionResult> PostMessage([FromBody] MessageRequest request)
     {
-        var username = User!.Identity!.Name;
+        string? username = User!.Identity!.Name;
 
-        //TODO: Returnera bool från SendMessage
-        await _messageService.SendMessage(request, username!);
+        //TODO: Kasta ett custom-fel så att rätt statuskod returneras
+        // ifall insättning av meddelande misslyckas
+        bool success = await _messageService.SendMessage(request, username!);
 
-        return Ok();
+        if (success)
+        {
+            await _hubContext.Clients
+            //.Client(request.ConversationId.ToString())
+            .All
+            .SendAsync("OnMessageReceived", request.Message, username);
+            return Ok();
+        }
+        
+
+        return BadRequest();
     }
 
     [HttpGet, Authorize]
@@ -33,6 +48,6 @@ public class MessageController : ControllerBase
         var username = User!.Identity!.Name;
         var messages = await _messageService.GetMessages(conversationId, username!);
 
-        return messages.Count() != 0 ? Ok(messages) : NotFound("No messages");
+        return messages.Count() != 0 ? Ok(messages) : Unauthorized("You do not have access to this conversation");
     }
 }
