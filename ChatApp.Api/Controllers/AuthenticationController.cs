@@ -12,10 +12,12 @@ namespace ChatApp.Api.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private static int _requests;
 
     public AuthenticationController(IAuthService authService)
     {
         _authService = authService;
+        _requests = 1;
     }
 
     [HttpPost("register")]
@@ -55,10 +57,11 @@ public class AuthenticationController : ControllerBase
     [HttpGet("me"), Authorize]
     public ActionResult ProtectedRoute()
     {
+        Console.WriteLine("Request: " + _requests++);
         return Ok(new
         {
             username = User!.Identity!.Name,
-            userId = User.FindFirst(ClaimTypes.NameIdentifier).Value
+            userId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
         });
     }
 
