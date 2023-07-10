@@ -1,6 +1,7 @@
 ﻿using ChatApp.Api.Hubs;
 using ChatApp.Api.Services.Messages;
 using ChatApp.Shared.Requests.Messages;
+using ChatApp.Shared.Requests.RequestFeatures.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -21,7 +22,7 @@ public class MessageController : ControllerBase
     }
 
     [HttpPost, Authorize]
-    public async Task<IActionResult> PostMessage([FromBody] MessageRequest request)
+    public async Task<IActionResult> PostMessage([FromBody] MessageRequest request) 
     {
         string? username = User!.Identity!.Name;
 
@@ -29,23 +30,17 @@ public class MessageController : ControllerBase
         // ifall insättning av meddelande misslyckas
         bool success = await _messageService.SendMessage(request, username!);
 
-        if (success)
-        {
-            //await _hubContext.Clients
-            ////.Client(request.ConversationId.ToString())
-            //.All
-            //.SendAsync("OnMessageReceived", request.Message, username);
-            return Ok();
-        }
-        return BadRequest();
+        return success ? Ok() : BadRequest();
+        
     }
 
     [HttpGet, Authorize]
-    public async Task<IActionResult> GetMessages(Guid conversationId)
+    public async Task<IActionResult> GetMessages(Guid conversationId,
+        [FromQuery] MessageParams messageParams)
     {
         var username = User!.Identity!.Name;
-        var messages = await _messageService.GetMessages(conversationId, username!);
+        var (messages, metaData) = await _messageService.GetMessages(conversationId, username!, messageParams);
 
-        return messages.Count() != 0 ? Ok(messages) : Unauthorized("You do not have access to this conversation");
+        return messages.Any() ? Ok(messages) : NotFound("No messages");
     }
 }

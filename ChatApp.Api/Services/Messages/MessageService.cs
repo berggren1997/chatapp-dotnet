@@ -2,8 +2,9 @@
 using ChatApp.Api.Models;
 using ChatApp.Shared.DTO.Messages;
 using ChatApp.Shared.Requests.Messages;
+using ChatApp.Shared.Requests.RequestFeatures;
+using ChatApp.Shared.Requests.RequestFeatures.Messages;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 
 namespace ChatApp.Api.Services.Messages;
 
@@ -16,52 +17,35 @@ public class MessageService : IMessageService
         _appContext = appContext;
     }
 
-    //TODO:
-    //1. Lägg så att man hämtar x-antal meddelande åt gången
-    //2. Kanske fixa ett middleware, som gör dessa kontroller på inkommande request,
-    // för att korta ner metoden?
-    public async Task<IEnumerable<MessageDto>> GetMessages(Guid conversationId,
-        string requesterUsername)
+    public async Task<(IEnumerable<MessageDto> messages, MetaData metaData)> GetMessages(Guid conversationId,
+        string requesterUsername, MessageParams messageParams)
     {
-        // 1. Kolla att användaren finns
         var user = await _appContext.Users
-            .FirstOrDefaultAsync(u => u.UserName == requesterUsername);
+            .FirstOrDefaultAsync(u => u.UserName == requesterUsername) ??
+            throw new Exception("User was not found.");
 
-        if (user == null) { return Enumerable.Empty<MessageDto>(); }
-
-        // 2. Kolla att konversationen finns
-        var conversation = await _appContext.Conversations
-            .Include(c => c.Creator)
-            .Include(r => r.Recipient)
-            .FirstOrDefaultAsync(c => c.Id == conversationId);
-
-        if (conversation == null) { return Enumerable.Empty<MessageDto>(); }
-
-        // 3. Kolla att användaren är en del utav konversationen
+        var conversation = await GetConversation(conversationId) ??
+            throw new Exception("Conversation was not found.");
 
         if (IsEligibleForConversation(user, conversation))
         {
-            // 4. Hämta meddelanden
-            var messages = await _appContext.Messages
-                .Include(s => s.Sender)
-                .Where(m => m.ConversationId == conversationId)
-                .OrderBy(d => d.CreatedAt)
-                .ToListAsync();
+            var messages = await GetPaginatedMessages(conversationId,
+                messageParams.PageNumber, messageParams.PageSize);
 
-            return FormattedMessages(messages);
+            var formattedMessages = FormattedMessages(messages);
+
+            return (messages: formattedMessages, metaData: messages.MetaData);
         }
 
-        return Enumerable.Empty<MessageDto>();
+        throw new Exception(@"User not authorized. Should throw some custom exception, 
+            and return 401.");
+        
     }
 
     public async Task<bool> SendMessage(MessageRequest messageRequest, string senderName)
     {
-        var conversation = await _appContext.Conversations
-            .Include(u => u.Creator)
-            .Include(r => r.Recipient)
-            .FirstOrDefaultAsync(c => c.Id == messageRequest.ConversationId) ??
+        var conversation = await GetConversation(messageRequest.ConversationId) ??
             throw new Exception(@$"Conversation with id: {messageRequest.ConversationId} doesnt exist");
-
 
         var user = await _appContext.Users
             .FirstOrDefaultAsync(u => u.UserName == senderName) ??
@@ -89,11 +73,39 @@ public class MessageService : IMessageService
         conversation.Creator.UserName == user.UserName ||
             conversation.Recipient.UserName == user.UserName;
 
-    private static IEnumerable<MessageDto> FormattedMessages(List<Message> messages) =>
+    private static IEnumerable<MessageDto> FormattedMessages(IEnumerable<Message> messages) =>
         messages.Select(m => new MessageDto
         {
             Message = m.Content!,
             Sender = m.Sender?.UserName!,
             SentAt = m.CreatedAt
         }).ToList();
+
+    private async Task<Conversation?> GetConversation(Guid conversationId)
+    {
+        return await _appContext.Conversations
+            .Include(c => c.Creator)
+            .Include(r => r.Recipient)
+            .FirstOrDefaultAsync(c => c.Id == conversationId);
+    }
+
+    private async Task<PagedList<Message>> GetPaginatedMessages(Guid conversationId, 
+        int pageNumber, int pageSize)
+    {
+        var messages = await _appContext.Messages
+                .Include(s => s.Sender)
+                .Where(m => m.ConversationId == conversationId)
+                .OrderByDescending(d => d.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .OrderBy(d => d.CreatedAt)
+                .ToListAsync();
+
+        var count = await _appContext.Messages
+                .Where(m => m.ConversationId == conversationId)
+                .CountAsync();
+
+        return PagedList<Message>
+            .ToPagedList(messages, count, pageNumber, pageSize);
+    }
 }
