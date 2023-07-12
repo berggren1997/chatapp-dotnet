@@ -1,4 +1,6 @@
 ﻿using ChatApp.Api.Models.ErrorModel;
+using ChatApp.Api.Models.Exceptions.BadRequestExceptions;
+using ChatApp.Api.Models.Exceptions.NotFoundExceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
 
@@ -10,27 +12,27 @@ public static class ExceptionMiddleware
     {
         app.UseExceptionHandler(appError =>
         {
-            app.Run(async context =>
+            appError.Run(async context =>
             {
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 context.Response.ContentType = "application/json";
 
                 var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
 
-                if (contextFeature is not null)
+                if (contextFeature != null)
                 {
                     context.Response.StatusCode = contextFeature.Error switch
                     {
+                        NotFoundException => StatusCodes.Status404NotFound,
+                        BadRequestException => StatusCodes.Status400BadRequest,
                         _ => StatusCodes.Status500InternalServerError
                     };
 
-                    var errorDetail = new ErrorDetail
+                    await context.Response.WriteAsync(new ErrorDetail
                     {
                         StatusCode = context.Response.StatusCode,
                         ErrorMessage = contextFeature.Error.Message,
-                    }.ToString();
-
-                    await context.Response.WriteAsync(errorDetail!);
+                    }.ToString());
                 }
             });
         });

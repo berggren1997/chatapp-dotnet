@@ -27,23 +27,22 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+app.ConfigureExceptionMiddlewareHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.ConfigureExceptionMiddlewareHandler();
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseCors("DefaultPolicy");
 //app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseMiddleware<ValidateSession>();
 
 app.MapHub<MessageHub>("/messageHub");
 

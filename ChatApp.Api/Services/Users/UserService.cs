@@ -1,4 +1,5 @@
 ﻿using ChatApp.Api.Data;
+using ChatApp.Api.Models.Exceptions.NotFoundExceptions;
 using ChatApp.Shared.DTO.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,8 +16,12 @@ public class UserService : IUserService
 
     public async Task<UserDto> FindUserByName(string username)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username) ??
-            throw new Exception($"User with username: {username} could not be found."); ;
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+
+        if( user == null)
+        {
+            throw new UserNotFoundException(username);
+        }
 
         return new UserDto
         {
@@ -31,8 +36,6 @@ public class UserService : IUserService
             .Where(u => u.UserName!.Contains(username))
             .AsNoTracking()
             .ToListAsync();
-
-        throw new Exception("hopefully this gives the right response");
 
         if (users.Any())
         {
