@@ -3,6 +3,7 @@ using ChatApp.Api.Models;
 using ChatApp.Api.Services.Auth;
 using ChatApp.Api.Services.Conversations;
 using ChatApp.Api.Services.Messages;
+using ChatApp.Api.Services.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 namespace ChatApp.Api.Extensions;
@@ -74,5 +75,6 @@ public static class ServiceExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IConversationService, ConversationService>();
         services.AddScoped<IMessageService, MessageService>();
+        services.AddScoped<IUserService, UserService>();
     }
 }

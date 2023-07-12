@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Configurations\" />
+    <Folder Include="Models\Exceptions\" />
   </ItemGroup>
 
   <ItemGroup>

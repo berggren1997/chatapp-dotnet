@@ -33,6 +33,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.ConfigureExceptionMiddlewareHandler();
+
 //app.UseHttpsRedirection();
 
 app.UseCors("DefaultPolicy");
