@@ -1,5 +1,6 @@
 ﻿using ChatApp.Api.Data;
 using ChatApp.Api.Models;
+using ChatApp.Api.Models.Exceptions.NotFoundExceptions;
 using ChatApp.Shared.DTO.Messages;
 using ChatApp.Shared.Requests.Messages;
 using ChatApp.Shared.Requests.RequestFeatures;
@@ -22,10 +23,10 @@ public class MessageService : IMessageService
     {
         var user = await _appContext.Users
             .FirstOrDefaultAsync(u => u.UserName == requesterUsername) ??
-            throw new Exception("User was not found.");
+            throw new UserNotFoundException(requesterUsername);
 
         var conversation = await GetConversation(conversationId) ??
-            throw new Exception("Conversation was not found.");
+            throw new ConversationNotFoundException(conversationId);
 
         if (IsEligibleForConversation(user, conversation))
         {
@@ -45,11 +46,11 @@ public class MessageService : IMessageService
     public async Task<bool> SendMessage(MessageRequest messageRequest, string senderName)
     {
         var conversation = await GetConversation(messageRequest.ConversationId) ??
-            throw new Exception(@$"Conversation with id: {messageRequest.ConversationId} doesnt exist");
+            throw new ConversationNotFoundException(messageRequest.ConversationId);
 
         var user = await _appContext.Users
             .FirstOrDefaultAsync(u => u.UserName == senderName) ??
-            throw new Exception("User does not exist.");
+            throw new UserNotFoundException(senderName);
 
         if (IsEligibleForConversation(user, conversation))
         {

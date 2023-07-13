@@ -61,7 +61,7 @@ public static class ServiceExtensions
     {
         services.ConfigureApplicationCookie(opt =>
         {
-            opt.ExpireTimeSpan = TimeSpan.FromDays(7);
+            opt.ExpireTimeSpan = TimeSpan.FromDays(100);
             opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             opt.Cookie.SameSite = SameSiteMode.None;
             opt.Cookie.HttpOnly = true;

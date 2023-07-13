@@ -1,5 +1,6 @@
 ﻿using ChatApp.Api.Data;
 using ChatApp.Api.Models;
+using ChatApp.Api.Models.Exceptions.NotFoundExceptions;
 using ChatApp.Shared.DTO.Conversations;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,11 +20,11 @@ public class ConversationService : IConversationService
     {
         var creatorUser = await _chatAppContext.Users
             .FirstOrDefaultAsync(c => c.UserName == creatorName) ?? 
-                throw new Exception("Creator does not exists");
+                throw new UserNotFoundException(creatorName);
         
         var recipientUser = await _chatAppContext.Users
             .FirstOrDefaultAsync(c => c.UserName == recipient) ?? 
-            throw new Exception("Recipient user does not exists");
+            throw new UserNotFoundException(recipient);
         
         var newConversation = new Conversation
         {
