@@ -24,13 +24,13 @@ public class ConversationController : ControllerBase
     }
 
     [HttpPost, Authorize]
-    public async Task<IActionResult> CreateConversation(string recipient)
+    public async Task<IActionResult> CreateConversation([FromBody] string recipient)
     {
         var creatorName = GetCurrentUsername();
 
-        var newConversationId = await _conversationService.CreateConversation(creatorName!, recipient);
+        var conversationId = await _conversationService.CreateConversation(creatorName!, recipient);
 
-        return Ok(newConversationId);
+        return Ok(conversationId);
     }
 
     private string? GetCurrentUsername() => User!.Identity?.Name;
