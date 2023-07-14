@@ -63,4 +63,23 @@ public class ConversationService : IConversationService
 
         return formattedConversations;
     }
+
+    public async Task<ConversationDto> GetConversation(Guid conversationId)
+    {
+        var conversation = await _chatAppContext.Conversations
+            .Include(c => c.Creator)
+            .Include(c => c.Recipient)
+            .FirstOrDefaultAsync(c => c.Id == conversationId);
+
+        return new ConversationDto
+        {
+            Id = conversationId,
+            CreatedAt = conversation.CreatedAt,
+            ConversationDetails = new ConversationDetailDto
+            {
+                Creator = conversation.Creator?.UserName!,
+                Recipient = conversation.Recipient?.UserName!
+            }
+        };
+    }
 }

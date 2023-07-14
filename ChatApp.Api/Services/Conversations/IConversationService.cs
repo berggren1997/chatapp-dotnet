@@ -7,4 +7,5 @@ public interface IConversationService
 {
     Task<Guid> CreateConversation(string creatorName, string recipient);
     Task<IEnumerable<ConversationDto>> GetConversations(string username);
+    Task<ConversationDto> GetConversation(Guid conversationId);
 }
