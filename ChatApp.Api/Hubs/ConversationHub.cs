@@ -14,13 +14,13 @@ namespace ChatApp.Api.Hubs
             _conversationService = conversationService;
         }
 
-        public async Task NewConversationNotification(Guid conversationId)
+        public async Task NewConversationEvent(Guid conversationId)
         {
             var conversation = await _conversationService.GetConversation(conversationId);
             
             if (conversation != null)
             {
-                await Clients.All.SendAsync("SomeEvent", $"Message from server with new conversation: {conversationId}");
+                await Clients.All.SendAsync("NewConversationEvent", conversation);
             }
         }
     }

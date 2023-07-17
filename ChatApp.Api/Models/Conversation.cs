@@ -8,4 +8,5 @@ public class Conversation
     public Guid CreatorId { get; set; }
     public AppUser Recipient { get; set; }
     public Guid RecipientId { get; set; }
+    public IEnumerable<Message> Messages { get; set; } = new List<Message>();
 }

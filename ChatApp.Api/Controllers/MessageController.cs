@@ -41,6 +41,6 @@ public class MessageController : ControllerBase
         var username = User!.Identity!.Name;
         var (messages, metaData) = await _messageService.GetMessages(conversationId, username!, messageParams);
 
-        return messages.Any() ? Ok(new { messages, metaData }) : NotFound("No messages");
+        return messages.Any() ? Ok(new { messages, metaData }) : NotFound();
     }
 }

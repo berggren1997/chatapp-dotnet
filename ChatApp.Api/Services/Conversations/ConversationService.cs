@@ -2,6 +2,7 @@
 using ChatApp.Api.Models;
 using ChatApp.Api.Models.Exceptions.NotFoundExceptions;
 using ChatApp.Shared.DTO.Conversations;
+using ChatApp.Shared.DTO.Messages;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Api.Services.Conversations;
@@ -43,22 +44,38 @@ public class ConversationService : IConversationService
     // TODO: Hämta bara x-antal konversationer
     public async Task<IEnumerable<ConversationDto>> GetConversations(string username)
     {
+        // TODO: Behöver en bättre query som inte hämtar alla meddelanden...
         var conversations = await _chatAppContext.Conversations
             .Include(c => c.Creator)
             .Include(c => c.Recipient)
+            .Include(m => m.Messages)
             .Where(uc => uc.Creator.UserName == username || 
                 uc.Recipient.UserName == username)
+            .Select(m => new
+            {
+                Conversation = m,
+                LastMessage = m.Messages
+                .OrderByDescending(d => d.CreatedAt)
+                .FirstOrDefault()
+            })
             .ToListAsync();
+
 
         var formattedConversations = conversations.Select(c => new ConversationDto
         {
-            Id = c.Id,
-            CreatedAt = c.CreatedAt,
+            Id = c.Conversation.Id,
+            CreatedAt = c.Conversation.CreatedAt,
             ConversationDetails = new ConversationDetailDto
             {
-                Creator = c.Creator?.UserName!,
-                Recipient = c.Recipient?.UserName!
-            }
+                Creator = c.Conversation.Creator?.UserName!,
+                Recipient = c.Conversation.Recipient?.UserName!
+            },
+            LastMessageDetails = new MessageDto
+            {
+                Sender = c.LastMessage?.Sender.UserName!,
+                Message = c.LastMessage?.Content!
+            },
+            // TODO: Se TODO precis ovanför, ska räcka att hämta det senaste direkt ur databasen
         }).ToList();
 
         return formattedConversations;

@@ -137,7 +137,7 @@ namespace ChatApp.Api.Migrations
 
                     b.HasIndex("RecipientId");
 
-                    b.ToTable("Conversations");
+                    b.ToTable("Conversations", (string)null);
                 });
 
             modelBuilder.Entity("ChatApp.Api.Models.Message", b =>
@@ -162,7 +162,7 @@ namespace ChatApp.Api.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
