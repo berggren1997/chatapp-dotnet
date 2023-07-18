@@ -1,5 +1,6 @@
 ﻿using ChatApp.Api.Data;
 using ChatApp.Api.Models;
+using ChatApp.Api.Models.Exceptions.BadRequestExceptions;
 using ChatApp.Api.Models.Exceptions.NotFoundExceptions;
 using ChatApp.Shared.DTO.Conversations;
 using ChatApp.Shared.DTO.Messages;
@@ -20,13 +21,16 @@ public class ConversationService : IConversationService
     public async Task<Guid> CreateConversation(string creatorName, string recipient)
     {
         var creatorUser = await _chatAppContext.Users
-            .FirstOrDefaultAsync(c => c.UserName == creatorName) ?? 
+            .FirstOrDefaultAsync(c => c.UserName == creatorName) ??
                 throw new UserNotFoundException(creatorName);
-        
+
         var recipientUser = await _chatAppContext.Users
-            .FirstOrDefaultAsync(c => c.UserName == recipient) ?? 
+            .FirstOrDefaultAsync(c => c.UserName == recipient) ??
             throw new UserNotFoundException(recipient);
-        
+
+        if (!await IsEligibleToCreateConversation(creatorName, recipient))
+            throw new ConversationBadRequestException("Conversation between the two parties already exist.");
+
         var newConversation = new Conversation
         {
             Id = Guid.NewGuid(),
@@ -44,12 +48,11 @@ public class ConversationService : IConversationService
     // TODO: Hämta bara x-antal konversationer
     public async Task<IEnumerable<ConversationDto>> GetConversations(string username)
     {
-        // TODO: Behöver en bättre query som inte hämtar alla meddelanden...
         var conversations = await _chatAppContext.Conversations
             .Include(c => c.Creator)
             .Include(c => c.Recipient)
             .Include(m => m.Messages)
-            .Where(uc => uc.Creator.UserName == username || 
+            .Where(uc => uc.Creator.UserName == username ||
                 uc.Recipient.UserName == username)
             .Select(m => new
             {
@@ -74,8 +77,7 @@ public class ConversationService : IConversationService
             {
                 Sender = c.LastMessage?.Sender.UserName!,
                 Message = c.LastMessage?.Content!
-            },
-            // TODO: Se TODO precis ovanför, ska räcka att hämta det senaste direkt ur databasen
+            }
         }).ToList();
 
         return formattedConversations;
@@ -98,5 +100,16 @@ public class ConversationService : IConversationService
                 Recipient = conversation.Recipient?.UserName!
             }
         };
+    }
+
+    private async Task<bool> IsEligibleToCreateConversation(string creator, string recipient)
+    {
+        var conversation = await _chatAppContext.Conversations
+            .Include(c => c.Creator)
+            .Include(c => c.Recipient)
+            .FirstOrDefaultAsync(c => c.Creator.UserName == creator && c.Recipient.UserName == recipient
+            || c.Creator.UserName == recipient && c.Recipient.UserName == creator);
+
+        return conversation == null;
     }
 }
