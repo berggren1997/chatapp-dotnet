@@ -46,6 +46,7 @@ app.UseAuthorization();
 
 app.MapHub<MessageHub>("/messageHub");
 app.MapHub<ConversationHub>("/conversationHub");
+app.MapHub<CallsHub>("/callsHub");
 
 app.MapControllers();
 

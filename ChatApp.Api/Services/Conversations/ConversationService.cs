@@ -71,7 +71,9 @@ public class ConversationService : IConversationService
             ConversationDetails = new ConversationDetailDto
             {
                 Creator = c.Conversation.Creator?.UserName!,
-                Recipient = c.Conversation.Recipient?.UserName!
+                CreatorId = c.Conversation.CreatorId,
+                Recipient = c.Conversation.Recipient?.UserName!,
+                RecipientId = c.Conversation.RecipientId
             },
             LastMessageDetails = new MessageDto
             {
@@ -97,7 +99,9 @@ public class ConversationService : IConversationService
             ConversationDetails = new ConversationDetailDto
             {
                 Creator = conversation.Creator?.UserName!,
-                Recipient = conversation.Recipient?.UserName!
+                CreatorId = conversation.CreatorId,
+                Recipient = conversation.Recipient?.UserName!,
+                RecipientId = conversation.RecipientId
             }
         };
     }
