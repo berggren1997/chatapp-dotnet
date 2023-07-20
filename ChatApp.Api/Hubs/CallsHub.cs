@@ -21,6 +21,6 @@ public class CallsHub : Hub
 
     public async Task DeclineCall(string callingUserId)
     {
-        await Clients.User(callingUserId).SendAsync("DeclineCall", $"{Context?.User?.Identity?.Name} avvisade samtalet");
+        await Clients.User(callingUserId).SendAsync("DeclineCall", $"{Context?.User?.Identity?.Name} declined the call.");
     }
 }
