@@ -78,7 +78,8 @@ public class ConversationService : IConversationService
             LastMessageDetails = new MessageDto
             {
                 Sender = c.LastMessage?.Sender.UserName!,
-                Message = c.LastMessage?.Content!
+                Message = c.LastMessage?.Content!,
+                SentAt = c.LastMessage?.CreatedAt!,
             }
         }).ToList();
 
