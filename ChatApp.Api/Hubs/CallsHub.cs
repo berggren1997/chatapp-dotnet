@@ -14,9 +14,17 @@ public class CallsHub : Hub
         await Clients.User(userId).SendAsync("IncomingCall", userIdClaim!, Context?.User?.Identity?.Name);
     }
 
-    public async Task AnswerCall(string callingUserId)
+    //public async Task AnswerCall(string callingUserId)
+    //{
+    //    await Clients.User(callingUserId).SendAsync("AcceptCall", $"{Context?.User?.Identity?.Name} accepterade samtalet");
+    //}
+
+    public async Task AnswerCall2(string callingUserId)
     {
-        await Clients.User(callingUserId).SendAsync("AcceptCall", $"{Context?.User?.Identity?.Name} accepterade samtalet");
+        var userIdClaim = Context!.User!.FindFirstValue(ClaimTypes.NameIdentifier);
+        var list = new List<string> { callingUserId, userIdClaim! };
+
+        await Clients.Users(list).SendAsync("AcceptCall", $"{Context?.User?.Identity?.Name} accepterade samtalet");
     }
 
     public async Task DeclineCall(string callingUserId)

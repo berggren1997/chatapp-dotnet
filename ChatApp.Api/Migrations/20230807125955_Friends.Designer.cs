@@ -4,6 +4,7 @@ using ChatApp.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatApp.Api.Migrations
 {
     [DbContext(typeof(ChatAppContext))]
-    partial class ChatAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230807125955_Friends")]
+    partial class Friends
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,6 +73,9 @@ namespace ChatApp.Api.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<Guid?>("FriendId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -104,6 +110,8 @@ namespace ChatApp.Api.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FriendId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -149,17 +157,12 @@ namespace ChatApp.Api.Migrations
                     b.Property<Guid>("AppUserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("FriendUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("FriendshipDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
-
-                    b.HasIndex("FriendUserId");
 
                     b.ToTable("Friends");
                 });
@@ -321,6 +324,13 @@ namespace ChatApp.Api.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ChatApp.Api.Models.AppUser", b =>
+                {
+                    b.HasOne("ChatApp.Api.Models.Friend", null)
+                        .WithMany("Friends")
+                        .HasForeignKey("FriendId");
+                });
+
             modelBuilder.Entity("ChatApp.Api.Models.Conversation", b =>
                 {
                     b.HasOne("ChatApp.Api.Models.AppUser", "Creator")
@@ -348,15 +358,7 @@ namespace ChatApp.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ChatApp.Api.Models.AppUser", "FriendUser")
-                        .WithMany()
-                        .HasForeignKey("FriendUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("AppUser");
-
-                    b.Navigation("FriendUser");
                 });
 
             modelBuilder.Entity("ChatApp.Api.Models.FriendRequest", b =>
@@ -449,6 +451,11 @@ namespace ChatApp.Api.Migrations
             modelBuilder.Entity("ChatApp.Api.Models.Conversation", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("ChatApp.Api.Models.Friend", b =>
+                {
+                    b.Navigation("Friends");
                 });
 #pragma warning restore 612, 618
         }
