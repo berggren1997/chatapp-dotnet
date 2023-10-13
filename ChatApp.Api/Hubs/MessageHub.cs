@@ -27,7 +27,8 @@ public class MessageHub : Hub
             {
                 Sender = username,
                 Message = messageRequest.Message,
-                SentAt = DateTime.Now
+                SentAt = DateTime.Now,
+                ConversationId = messageRequest.ConversationId
             };
 
             await Clients.All.SendAsync("OnMessageReceived", messageResponse);

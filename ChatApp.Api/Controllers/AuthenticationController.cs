@@ -53,6 +53,13 @@ public class AuthenticationController : ControllerBase
             Username = request.Username
         });
     }
+    [HttpGet("signout")]
+    public async Task<IActionResult> SignOut()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        await _authService.RevokeSession(Guid.Parse(userId));
+        return Ok();
+    }
 
     [HttpGet("me"), Authorize]
     public ActionResult ProtectedRoute()

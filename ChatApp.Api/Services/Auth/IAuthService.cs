@@ -9,4 +9,5 @@ public interface IAuthService
     Task<RegisterResponse> Register(RegisterRequest registerRequest);
     Task<bool> Login(LoginRequest loginRequest);
     Task RevokeSession(Guid userId);
+   
 }
