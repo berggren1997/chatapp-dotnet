@@ -16,11 +16,16 @@ namespace ChatApp.Api.Hubs
 
         public async Task NewConversationEvent(Guid conversationId)
         {
+
             var conversation = await _conversationService.GetConversation(conversationId);
             
             if (conversation != null)
             {
-                await Clients.All.SendAsync("NewConversationEvent", conversation);
+                await Groups.AddToGroupAsync(conversation.ConversationDetails.CreatorId.ToString(), conversationId.ToString());
+                await Groups.AddToGroupAsync(conversation.ConversationDetails.RecipientId.ToString(), conversationId.ToString());
+                //await Clients.All.SendAsync("NewConversationEvent", conversation);
+                await Clients.User(conversation.ConversationDetails.CreatorId.ToString()).SendAsync("NewConversationEvent", conversation);
+                await Clients.User(conversation.ConversationDetails.RecipientId.ToString()).SendAsync("NewConversationEvent", conversation);
             }
         }
     }

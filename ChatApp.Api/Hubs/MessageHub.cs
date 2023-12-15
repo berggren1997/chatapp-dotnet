@@ -22,10 +22,12 @@ public class MessageHub : Hub
 
         string username = Context.User?.Identity!.Name!;
 
-        bool savedMessage = await _messageService.SendMessage(messageRequest, username!);
+        var convo = await _messageService.SendMessage2(messageRequest, username!);
 
-        if (savedMessage)
+        if (convo != null)
         {
+            await Groups.AddToGroupAsync(convo.ConversationDetails.CreatorId.ToString(), messageRequest.ConversationId.ToString());
+            await Groups.AddToGroupAsync(convo.ConversationDetails.RecipientId.ToString(), messageRequest.ConversationId.ToString());
             var messageResponse = new MessageResponse
             {
                 Sender = username,
@@ -33,8 +35,9 @@ public class MessageHub : Hub
                 SentAt = DateTime.Now,
                 ConversationId = messageRequest.ConversationId
             };
-
-            await Clients.All.SendAsync("OnMessageReceived", messageResponse);
+            await Clients.User(convo.ConversationDetails.CreatorId.ToString()).SendAsync("OnMessageReceived", messageResponse);
+            await Clients.User(convo.ConversationDetails.RecipientId.ToString()).SendAsync("OnMessageReceived", messageResponse);
+            //await Clients.All.SendAsync("OnMessageReceived", messageResponse);
         }
     }
 }

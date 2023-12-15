@@ -2,6 +2,7 @@
 using ChatApp.Api.Models;
 using ChatApp.Api.Models.Exceptions.BadRequestExceptions;
 using ChatApp.Api.Models.Exceptions.NotFoundExceptions;
+using ChatApp.Shared.DTO.Conversations;
 using ChatApp.Shared.DTO.Messages;
 using ChatApp.Shared.Requests.Messages;
 using ChatApp.Shared.Requests.RequestFeatures;
@@ -72,6 +73,47 @@ public class MessageService : IMessageService
             return await _appContext.SaveChangesAsync() > 0;
         }
         return false;
+    }
+
+
+    public async Task<ConversationDto> SendMessage2(MessageRequest messageRequest, string senderName)
+    {
+        var conversation = await GetConversation(messageRequest.ConversationId) ??
+            throw new ConversationNotFoundException(messageRequest.ConversationId);
+
+        var user = await _appContext.Users
+            .FirstOrDefaultAsync(u => u.UserName == senderName) ??
+            throw new UserNotFoundException(senderName);
+
+        if (IsEligibleForConversation(user, conversation))
+        {
+            if (string.IsNullOrEmpty(messageRequest.Message))
+            {
+                throw new MessageBadRequestException("Message cannot be empty");
+            }
+            var message = new Message
+            {
+                Id = Guid.NewGuid(),
+                Content = messageRequest.Message,
+                ConversationId = conversation.Id,
+                Sender = user,
+                CreatedAt = DateTime.Now
+            };
+
+            _appContext.Messages.Add(message);
+            await _appContext.SaveChangesAsync();
+        }
+        return new ConversationDto
+        {
+            Id = conversation.Id,
+            ConversationDetails = new ConversationDetailDto
+            {
+                CreatorId = conversation.CreatorId,
+                RecipientId = conversation.RecipientId,
+                Creator = conversation.Creator.UserName,
+                Recipient = conversation.Recipient.UserName
+            },
+        };
     }
 
     private static bool IsEligibleForConversation(AppUser user,
