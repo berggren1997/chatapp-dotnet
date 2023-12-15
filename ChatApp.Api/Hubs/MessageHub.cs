@@ -3,6 +3,7 @@ using ChatApp.Shared.Requests.Messages;
 using ChatApp.Shared.Response.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace ChatApp.Api.Hubs;
 
@@ -37,7 +38,6 @@ public class MessageHub : Hub
             };
             await Clients.User(convo.ConversationDetails.CreatorId.ToString()).SendAsync("OnMessageReceived", messageResponse);
             await Clients.User(convo.ConversationDetails.RecipientId.ToString()).SendAsync("OnMessageReceived", messageResponse);
-            //await Clients.All.SendAsync("OnMessageReceived", messageResponse);
         }
     }
 }
