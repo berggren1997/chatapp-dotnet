@@ -53,10 +53,11 @@ public class AuthenticationController : ControllerBase
             Username = request.Username
         });
     }
-    [HttpGet("signout")]
-    public async Task<IActionResult> SignOut()
+
+    [HttpGet("signout"), Authorize]
+    public async Task<IActionResult> LogOut()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         await _authService.RevokeSession(Guid.Parse(userId));
         return Ok();
     }
@@ -72,12 +73,12 @@ public class AuthenticationController : ControllerBase
         });
     }
 
-    //[Authorize("Admin")]
-    [HttpGet("revoke")]
-    public async Task<IActionResult> RevokeSession(Guid userId)
-    {
-        await _authService.RevokeSession(userId);
+    //[Authorize(Roles = "Admin")]
+    //[HttpGet("revoke")]
+    //public async Task<IActionResult> RevokeSession(Guid userId)
+    //{
+    //    await _authService.RevokeSession(userId);
 
-        return Ok("All old usersessions should be inactive. Please log in again");
-    }
+    //    return Ok();
+    //}
 }

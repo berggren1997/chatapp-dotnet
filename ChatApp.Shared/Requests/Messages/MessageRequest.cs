@@ -6,7 +6,7 @@ public class MessageRequest : IValidatableObject
 {
     [Required]
     public Guid ConversationId { get; set; }
-    
+
     public string Message { get; set; } = string.Empty;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

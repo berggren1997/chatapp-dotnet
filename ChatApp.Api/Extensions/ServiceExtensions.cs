@@ -53,7 +53,7 @@ public static class ServiceExtensions
                 config.AllowAnyMethod();
                 //config.AllowAnyOrigin();
                 config.AllowCredentials();
-                config.WithOrigins("http://localhost:3000", "http://localhost:5247");
+                config.WithOrigins("http://127.0.0.1:3000", "http://localhost:5247");
             });
         });
     }

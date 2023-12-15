@@ -28,6 +28,9 @@ public class ConversationService : IConversationService
             .FirstOrDefaultAsync(c => c.UserName == recipient) ??
             throw new UserNotFoundException(recipient);
 
+        if (creatorUser.UserName == recipientUser.UserName)
+            throw new ConversationBadRequestException("Can't create a conversation with yourself");
+
         if (!await IsEligibleToCreateConversation(creatorName, recipient))
             throw new ConversationBadRequestException("Conversation between the two parties already exist.");
 

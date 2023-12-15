@@ -18,7 +18,10 @@ public class MessageHub : Hub
 
     public async Task SendMessageAsync(MessageRequest messageRequest)
     {
+        if (string.IsNullOrEmpty(messageRequest.Message.Trim())) return;
+
         string username = Context.User?.Identity!.Name!;
+
         bool savedMessage = await _messageService.SendMessage(messageRequest, username!);
 
         if (savedMessage)

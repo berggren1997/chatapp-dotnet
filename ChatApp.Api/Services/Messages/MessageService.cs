@@ -1,5 +1,6 @@
 ﻿using ChatApp.Api.Data;
 using ChatApp.Api.Models;
+using ChatApp.Api.Models.Exceptions.BadRequestExceptions;
 using ChatApp.Api.Models.Exceptions.NotFoundExceptions;
 using ChatApp.Shared.DTO.Messages;
 using ChatApp.Shared.Requests.Messages;
@@ -54,6 +55,10 @@ public class MessageService : IMessageService
 
         if (IsEligibleForConversation(user, conversation))
         {
+            if (string.IsNullOrEmpty(messageRequest.Message))
+            {
+                throw new MessageBadRequestException("Message cannot be empty");
+            }
             var message = new Message
             {
                 Id = Guid.NewGuid(),
