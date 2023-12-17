@@ -1,8 +1,18 @@
+using ChatApp.Api.Data;
 using ChatApp.Api.Extensions;
 using ChatApp.Api.Hubs;
 using ChatApp.Api.Middleware;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false)
+    .AddJsonFile($"appsettings.{builder.Environment}.json")
+    .AddEnvironmentVariables()
+    .Build();
+
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -15,25 +25,19 @@ builder.Services.ConfigureCorsPolicy();
 builder.Services.ConfigureCookieOptions();
 builder.Services.AddSignalR();
 
-//builder.Services.AddDistributedMemoryCache();
-
-//builder.Services.AddSession(opt =>
-//{
-//    opt.IdleTimeout = TimeSpan.FromMinutes(15);
-//    opt.Cookie.Name = "sid";
-//    opt.Cookie.HttpOnly = true;
-//    opt.Cookie.IsEssential = true;
-//});
-
 var app = builder.Build();
+
+using var scope = app.Services.CreateScope();
+using var dbContext = scope.ServiceProvider.GetRequiredService<ChatAppContext>();
+dbContext.Database.Migrate();
 
 app.ConfigureExceptionMiddlewareHandler();
 
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 
 //app.UseHttpsRedirection();
